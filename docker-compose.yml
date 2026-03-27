@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile.sandbox
+    container_name: telos-scale-sandbox
+    mem_limit: 512m
+    # Keep container running for testing
+    command: sleep infinity
+    # Optional volume mapping for local code
+    # volumes:
+    #   - ./workspace:/workspace
+
+  # Optional shared server for future versions
+  # shared-server:
+  #   image: postgres:15
+  #   environment:
+  #     POSTGRES_DB: telos
+  #     POSTGRES_USER: telos
+  #     POSTGRES_PASSWORD: secret
+  #   ports:
+  #     - "5432:5432"

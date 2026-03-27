@@ -1,0 +1,27 @@
+# Docker image for Telos-Scale sandbox
+FROM python:3.11-slim
+
+WORKDIR /workspace
+
+# Install basic utilities for code execution
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Ensure Python packages can be installed
+RUN pip install --no-cache-dir \
+    requests \
+    numpy \
+    pandas \
+    matplotlib \
+    # Add any common packages that might be needed for experiments
+    && rm -rf /root/.cache/pip
+
+# Set up a non-root user (optional)
+RUN useradd -m -u 1000 -s /bin/bash telos \
+    && chown -R telos:telos /workspace
+USER telos
+
+CMD ["sleep", "infinity"]
