@@ -127,7 +127,7 @@ class DockerSandbox:
 
     def __del__(self):
         """Cleanup on deletion."""
-        if self.container is not None:
+        if hasattr(self, 'container') and self.container is not None:
             try:
                 self.stop(cleanup=True)
             except:
