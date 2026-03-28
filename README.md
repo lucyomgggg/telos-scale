@@ -26,39 +26,32 @@ Instead of complex algorithms with limited trials, Telos-Scale embraces:
 - **Python** 3.11+
 - **OpenRouter API Key** (or other LLM provider)
 
-### Installation
+### Installation & Setup
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/telos-scale/telos-scale.git
 cd telos-scale
 
-# 2. Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+# 2. Run automatic setup
+./setup.sh                 # On Windows: setup.bat
 
-# 3. Install dependencies
-pip install -r requirements.txt
-
-# 4. Set API key
-export OPENROUTER_API_KEY="sk-or-..."  # Add to ~/.bashrc or ~/.zshrc for persistence
+# 3. Configure API Key
+# Open the generated .env file and add your key:
+# OPENROUTER_API_KEY="sk-or-..."
 ```
 
 ### Your First Autonomous Run
 
 ```bash
-# Run a simple demo
-telos-scale demo
+# Start the autonomous loop with one click
+./run.sh                   # On Windows: run.bat
 
-# Execute 10 autonomous loops
-telos-scale run --loops 10
-
-# Run 100 loops with 5 parallel workers
+# (Optional) Customize settings in config.yml
+# Or use the CLI for advanced control:
 telos-scale run --loops 100 --workers 5
-
-# Enable sharing with community knowledge base
-telos-scale run --loops 50 --share --shared-url https://api.telos.scale
 ```
+
 
 ## 📖 How It Works
 
@@ -314,10 +307,9 @@ pre-commit install
 
 ## 📚 Learn More
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)**: Detailed system design
-- **[Philosophy](telos-scale-philosophy.md)**: Core beliefs and vision
-- **[Design Doc](telos-scale-default-design.md)**: Technical specifications
-- **[Examples](examples/)**: Practical usage examples
+- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)**: Detailed system design
+- **[Philosophy](docs/telos-scale-philosophy.md)**: Core beliefs and vision
+- **[Design Doc](docs/telos-scale-default-design.md)**: Technical specifications
 
 ## 🔗 Links
 
