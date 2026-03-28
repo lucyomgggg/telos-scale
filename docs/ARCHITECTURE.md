@@ -156,9 +156,10 @@ Telos-Scale is an autonomous AI agent platform built on the principle that **int
 
 **Features**:
 - Consistent interface across providers
-- Cost estimation and tracking
-- Token counting approximation
-- Fallback handling
+- **Multi-provider API keys**: Dynamically detects `DEEPSEEK_API_KEY`, `GEMINI_API_KEY`, etc.
+- **Fail-fast design**: No dummy fallbacks on connection errors
+- Cost estimation based on real pricing data
+- Token counting via LiteLLM
 
 **Methods**:
 - `complete()`: Generate LLM response
@@ -205,10 +206,15 @@ Telos-Scale is an autonomous AI agent platform built on the principle that **int
 ### Autonomous Loop Sequence
 
 ```
-1. INITIALIZATION
-   └─ Create components with configuration
+1. INITIALIZATION & SETUP
+   ├─ Run `./setup.sh` (Check Docker, venv, deps)
+   └─ Configure `.env` with provider-specific key
 
-2. CONTEXT RETRIEVAL
+2. EXECUTION (./run.sh)
+   ├─ Activate virtual environment
+   └─ Launch `telos-scale run`
+
+3. CONTEXT RETRIEVAL
    ├─ Retrieve N most recent local trials
    ├─ (Optional) Query shared knowledge base
    └─ Combine and format for LLM prompt
@@ -297,7 +303,9 @@ Telos-Scale is an autonomous AI agent platform built on the principle that **int
 
 | Variable | Purpose | Default |
 |----------|---------|---------|
-| `OPENROUTER_API_KEY` | LLM provider API key | (Required) |
+| `DEEPSEEK_API_KEY` | DeepSeek API key | (Optional) |
+| `GEMINI_API_KEY` | Google Gemini API key | (Optional) |
+| `OPENROUTER_API_KEY` | OpenRouter (generic fallback) | (Optional) |
 | `TELOS_MODEL` | Default LLM model | `"gemini/gemini-flash-latest"` |
 | `TELOS_MAX_TOKENS` | Max tokens per LLM call | `8000` |
 | `TELOS_DOCKER_IMAGE` | Sandbox container image | `"python:3.11-slim"` |

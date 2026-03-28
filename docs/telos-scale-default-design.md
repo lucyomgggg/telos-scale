@@ -189,24 +189,13 @@ class LocalMemory:
 git clone https://github.com/telos-scale/telos-scale.git
 cd telos-scale
 
-# 2. 仮想環境作成
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+# 2. 自動セットアップ
+# このスクリプトが仮想環境の構築、依存関係のインストール、Dockerの起動確認をすべて行います。
+./setup.sh                 # Windowsの場合: setup.bat
 
-# 3. 依存関係インストール
-pip install -r requirements.txt
-# requirements.txt:
-# litellm==1.0.0
-# requests==2.31.0
-# docker==6.1.0
-
-# 4. 環境変数設定
-echo "OPENROUTER_API_KEY=sk-or-..." > .env
-# または
-export OPENROUTER_API_KEY="sk-or-..."
-
-# 5. Dockerの起動 (バックグラウンドで実行中であることを確認)
-docker --version
+# 3. 環境変数設定
+# 生成された .env ファイルを開き、使用するモデルに応じたキーを設定してください。
+# 例: DEEPSEEK_API_KEY="sk-..." または OPENROUTER_API_KEY="sk-or-..."
 ```
 
 ### 3.3 ワンライナーインストール (デモ用)
@@ -224,18 +213,20 @@ curl -s https://telos.scale/install.sh | bash
 
 ### 4.1 基本的な実行
 
+同梱のラッパースクリプト `run.sh` / `run.bat` を使用するのが最も簡単です。
+
 ```bash
 # 10ループを逐次実行
-telos-scale run --loops 10
+./run.sh --loops 10
 
 # 5ワーカーで並列実行 (合計100ループ)
-telos-scale run --loops 100 --workers 5
+./run.sh --loops 100 --workers 5
 
 # 共有モードで実行 (結果を自動アップロード)
-telos-scale run --loops 50 --share --shared-url https://api.telos.scale
+./run.sh --loops 50 --share --shared-url https://api.telos.scale
 
 # 特定のモデルを使用
-telos-scale run --loops 20 --model "openrouter/deepseek/deepseek-chat-v3-0324"
+./run.sh --loops 20 --model "deepseek/deepseek-chat"
 ```
 
 ### 4.2 コマンドリファレンス

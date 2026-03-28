@@ -24,14 +24,24 @@ class LLMClient:
         self.model = model
         self.max_tokens = max_tokens
         self.temperature = temperature
-        # Set up API key
+        
+        # Determine necessary environment variable based on model provider
+        provider = model.split("/")[0].lower() if "/" in model else "openai"
+        key_var = f"{provider.upper()}_API_KEY"
+        
+        # If specific provider key is missing, check for OPENROUTER_API_KEY as a generic proxy
         if api_key:
-            os.environ["OPENROUTER_API_KEY"] = api_key
-        elif "OPENROUTER_API_KEY" not in os.environ:
-            logger.warning("OPENROUTER_API_KEY environment variable not set.")
+            os.environ[key_var] = api_key
+        elif key_var not in os.environ:
+            if "OPENROUTER_API_KEY" in os.environ:
+                logger.info(f"Using OPENROUTER_API_KEY as fallback for provider '{provider}'")
+            else:
+                logger.warning(f"Required API key '{key_var}' not found in environment.")
+
         # Optional base URL for custom endpoints
         if base_url:
-            os.environ[f"{model.upper().replace('/', '_')}_API_BASE"] = base_url
+            base_var = f"{model.upper().replace('/', '_')}_API_BASE"
+            os.environ[base_var] = base_url
 
     def complete(
         self,
@@ -51,30 +61,36 @@ class LLMClient:
             )
             return response.choices[0].message.content
         except Exception as e:
-            logger.error(f"LLM completion failed: {e}")
-            # Fallback to a simple response
-            return "Write a 'Hello, World!' program in Python."
+            logger.error(f"LLM completion failed for model {self.model}: {e}")
+            # Do NOT fallback to dummy strings. Let the caller handle the error.
+            raise
 
     def estimate_cost(self, prompt_tokens: int, completion_tokens: int) -> float:
-        """Estimate cost in USD based on model pricing (placeholder)."""
-        # Rough estimates per 1K tokens
-        pricing = {
-            "gemini/gemini-flash-latest": 0.000075,  # $0.075 per 1K tokens
-            "openrouter/deepseek/deepseek-chat-v3-0324": 0.00014,
-            "gpt-4o-mini": 0.00015,
+        """Estimate cost in USD based on model pricing."""
+        # Pricing per 1M tokens as of late 2024 / early 2025
+        pricing_data = {
+            "gemini/gemini-flash-latest": {"prompt": 0.075, "completion": 0.30},
+            "deepseek/deepseek-chat": {"prompt": 0.14, "completion": 0.28},
+            "gpt-4o-mini": {"prompt": 0.15, "completion": 0.60},
         }
-        rate = pricing.get(self.model, 0.0001)
-        total_tokens = prompt_tokens + completion_tokens
-        return (total_tokens / 1000) * rate
+        
+        # Use simple pricing if specific data isn't available
+        model_pricing = pricing_data.get(self.model, {"prompt": 0.1, "completion": 0.2})
+        cost = (prompt_tokens / 1_000_000 * model_pricing["prompt"]) + \
+               (completion_tokens / 1_000_000 * model_pricing["completion"])
+        return cost
 
     def count_tokens(self, text: str) -> int:
-        """Approximate token count (placeholder)."""
-        # Simple approximation: 4 chars per token
-        return len(text) // 4
+        """Approximate token count."""
+        try:
+            return litellm.token_counter(model=self.model, text=text)
+        except:
+            # Fallback if litellm counter fails
+            return len(text) // 4
 
 
 if __name__ == "__main__":
-    # Quick test (requires API key)
+    # Quick test
     client = LLMClient()
     print("Model:", client.model)
     test_prompt = "Say hello in one word."
@@ -82,4 +98,4 @@ if __name__ == "__main__":
         result = client.complete(test_prompt, max_tokens=10)
         print("Completion:", result)
     except Exception as e:
-        print(f"Error (expected without API key): {e}")
+        print(f"Connection test failed (this is expected if no API key is set): {e}")

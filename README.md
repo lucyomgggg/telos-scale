@@ -22,9 +22,9 @@ Instead of complex algorithms with limited trials, Telos-Scale embraces:
 ## 🚀 Quick Start
 
 ### Prerequisites
-- **Docker** 20.10+
+- **Docker** 20.10+ (Installed; will be started automatically if not running during setup)
 - **Python** 3.11+
-- **OpenRouter API Key** (or other LLM provider)
+- **API Key** (OpenRouter, DeepSeek, Google Gemini, etc.)
 
 ### Installation & Setup
 
@@ -33,23 +33,23 @@ Instead of complex algorithms with limited trials, Telos-Scale embraces:
 git clone https://github.com/telos-scale/telos-scale.git
 cd telos-scale
 
-# 2. Run automatic setup
+# 2. Run automatic setup (This installs deps and starts Docker)
 ./setup.sh                 # On Windows: setup.bat
 
 # 3. Configure API Key
 # Open the generated .env file and add your key:
-# OPENROUTER_API_KEY="sk-or-..."
+# DEEPSEEK_API_KEY="sk-..." or OPENROUTER_API_KEY="sk-or-..."
 ```
 
 ### Your First Autonomous Run
 
 ```bash
-# Start the autonomous loop with one click
+# Start the autonomous loop via the wrapper script
 ./run.sh                   # On Windows: run.bat
 
 # (Optional) Customize settings in config.yml
-# Or use the CLI for advanced control:
-telos-scale run --loops 100 --workers 5
+# The wrapper passes arguments directly to the CLI:
+./run.sh --loops 100 --workers 5
 ```
 
 

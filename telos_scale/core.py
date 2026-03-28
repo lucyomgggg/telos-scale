@@ -77,12 +77,15 @@ class TelosScale:
     def _generate_goal(self, context: List[Dict]) -> str:
         """Generate a new goal based on context using LLM."""
         prompt = self._build_goal_prompt(context)
-        response = self.llm.complete(prompt, max_tokens=500)
-        goal = response.strip()
-        # Simple validation: if empty, fallback
-        if not goal:
-            goal = "Write a 'Hello, World!' program in Python."
-        return goal
+        try:
+            response = self.llm.complete(prompt, max_tokens=500)
+            goal = response.strip()
+            if not goal:
+                raise ValueError("LLM returned an empty goal.")
+            return goal
+        except Exception as e:
+            self.logger.error(f"Failed to generate goal: {e}")
+            raise  # Re-raise to stop the loop or caller handling
 
     def _build_goal_prompt(self, context: List[Dict]) -> str:
         """Construct prompt for goal generation."""
@@ -101,13 +104,20 @@ Respond with only the goal description, no extra text."""
 
     def _execute_goal(self, goal: str) -> str:
         """Execute the goal in Docker sandbox and capture result."""
+        if not goal or goal.startswith("Error"):
+            return f"Invalid goal: {goal}"
+            
         try:
             self.sandbox.start()
             # For now, a simple implementation: run a command based on goal
-            # We'll implement more sophisticated logic later.
-            # Placeholder: just echo the goal and capture output.
             cmd = f"echo 'Goal: {goal}' && python -c \"print('Executing...')\""
             exit_code, output = self.sandbox.execute_command(cmd)
+            
+            # Simple token counting for cost estimation
+            prompt_tokens = self.llm.count_tokens(goal)
+            completion_tokens = self.llm.count_tokens(output)
+            self.cost_tracker += self.llm.estimate_cost(prompt_tokens, completion_tokens)
+            
             if exit_code == 0:
                 result = f"Success: {output[:200]}"
             else:
@@ -115,21 +125,25 @@ Respond with only the goal description, no extra text."""
             self.sandbox.stop(cleanup=True)
             return result
         except Exception as e:
+            self.logger.error(f"Sandbox execution failed: {e}")
             return f"Sandbox execution failed: {str(e)}"
 
     def _record(self, goal: str, result: str):
         """Store trial in local memory."""
         self.memory.add(goal, result)
-        # Simple cost tracking (placeholder)
-        self.cost_tracker += 0.001  # dummy cost
+        # Cost is now tracked in _execute_goal using real estimations
 
     def run(self, loops: int = 10, workers: int = 1):
         """Run multiple loops, optionally in parallel."""
         if workers > 1:
             self._run_parallel(loops, workers)
         else:
-            for i in range(loops):
-                self.run_loop()
+            try:
+                for i in range(loops):
+                    self.run_loop()
+            except Exception as e:
+                self.logger.critical(f"Aborting run due to critical error: {e}")
+                return
 
     def _run_parallel(self, loops: int, workers: int):
         """Parallel execution using multiprocessing (placeholder)."""
