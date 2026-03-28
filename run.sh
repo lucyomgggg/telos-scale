@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# run.sh
+
+if [ ! -d ".venv" ]; then
+    echo "Virtual environment not found. Please run ./setup.sh first."
+    exit 1
+fi
+
+source .venv/bin/activate
+
+echo "Starting Telos-Scale using settings from config.yml..."
+telos-scale run

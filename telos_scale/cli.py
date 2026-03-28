@@ -7,9 +7,23 @@ import sys
 import os
 import logging
 from typing import Optional
+import yaml
+from dotenv import load_dotenv
 from telos_scale import TelosScale
 
 logger = logging.getLogger(__name__)
+
+def load_config():
+    """Load configuration from .env and config.yml."""
+    load_dotenv()
+    config = {}
+    if os.path.exists("config.yml"):
+        with open("config.yml", "r") as f:
+            try:
+                config = yaml.safe_load(f) or {}
+            except Exception as e:
+                logger.warning(f"Failed to parse config.yml: {e}")
+    return config
 
 
 def setup_logging(verbose: bool):
@@ -84,21 +98,25 @@ def parse_args():
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
 
+    config = load_config()
+
     # run command
     run_parser = subparsers.add_parser("run", help="Run autonomous loops")
-    run_parser.add_argument("--loops", type=int, default=10, help="Number of loops to execute")
-    run_parser.add_argument("--workers", type=int, default=1, help="Number of parallel workers")
-    run_parser.add_argument("--model", type=str, default="gemini/gemini-flash-latest",
+    run_parser.add_argument("--loops", type=int, default=config.get("loops", 10), help="Number of loops to execute")
+    run_parser.add_argument("--workers", type=int, default=config.get("workers", 1), help="Number of parallel workers")
+    run_parser.add_argument("--model", type=str, default=config.get("model", "gemini/gemini-flash-latest"),
                           help="LLM model to use")
-    run_parser.add_argument("--share", action="store_true", help="Enable sharing")
+    
+    # Enable sharing if explicitly set in cli, or if set to true in config
+    run_parser.add_argument("--share", action="store_true", default=config.get("share", False), help="Enable sharing")
     run_parser.add_argument("--shared-url", type=str,
-                          default="https://api.telos.scale",
+                          default=config.get("shared_url", "https://api.telos.scale"),
                           help="Shared server URL")
     run_parser.add_argument("--sandbox-image", type=str,
-                          default="python:3.11-slim",
+                          default=config.get("sandbox_image", "python:3.11-slim"),
                           help="Docker image for sandbox")
     run_parser.add_argument("--sandbox-memory", type=str,
-                          default="512m",
+                          default=config.get("sandbox_memory", "512m"),
                           help="Memory limit for sandbox container")
     run_parser.add_argument("--verbose", "-v", action="store_true",
                           help="Enable verbose logging")

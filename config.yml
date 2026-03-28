@@ -1,0 +1,24 @@
+# Telos-Scale Configuration Template
+# Copy this file to config.yml to customize your settings.
+
+# Number of autonomous loops to execute
+loops: 10
+
+# Number of parallel workers
+workers: 1
+
+# LLM model to use (default: gemini/gemini-flash-latest)
+# The actual API key should be placed in .env
+model: "gemini/gemini-flash-latest"
+
+# Enable community sharing
+share: false
+
+# Shared server URL
+shared_url: "https://api.telos.scale"
+
+# Docker image for sandbox environment
+sandbox_image: "python:3.11-slim"
+
+# Memory limit for sandbox container
+sandbox_memory: "512m"
