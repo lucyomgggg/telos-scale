@@ -9,7 +9,7 @@ workers: 1
 
 # LLM model to use (default: gemini/gemini-flash-latest)
 # The actual API key should be placed in .env
-model: "gemini/gemini-flash-latest"
+model: "deepseek/deepseek-chat"
 
 # Enable community sharing
 share: false
